@@ -27,8 +27,14 @@ import (
 )
 
 const (
+	baseURL           = "http://www.skiinfo.fr"
 	countryResortsURL = "http://www.skiinfo.fr/%s/stations-de-ski.html"
 )
+
+type Resort struct {
+	Name   string
+	Region string
+}
 
 func fetch(uri string, data url.Values) ([]byte, error) {
 	u, _ := url.ParseRequestURI(uri)
@@ -53,6 +59,7 @@ func fetch(uri string, data url.Values) ([]byte, error) {
 
 func ListResorts(country string) ([]string, error) {
 	logrus.Debugf("Retrieve resorts for country: %s", country)
+	resorts := []string{}
 	uri := fmt.Sprintf(countryResortsURL, country)
 	body, err := fetch(uri, url.Values{})
 	if err != nil {
@@ -68,12 +75,24 @@ func ListResorts(country string) ([]string, error) {
 		// token := z.Token()
 		switch tokenType {
 		case html.StartTagToken: // <tag>
-			//t := z.Token()
+			t := z.Token()
+			if t.Data == "div" {
+				if len(t.Attr) > 0 && t.Attr[0].Val == "name" {
+					z.Next()
+					link := z.Token()
+					// fmt.Printf("Resort link: %s %s\n", link, link.Attr)
+					if len(link.Attr) > 1 && link.Attr[1].Key == "title" {
+						logrus.Debugf("Resort: %s\n", link.Attr[1].Val)
+						resorts = append(resorts, link.Attr[1].Val)
+					}
+				}
+
+			}
 		case html.TextToken: // text between start and end tag
 		case html.EndTagToken: // </tag>
 		case html.SelfClosingTagToken: // <tag/>
 		}
 	}
 
-	return nil, nil
+	return resorts, nil
 }

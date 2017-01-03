@@ -32,8 +32,10 @@ const (
 )
 
 type Resort struct {
-	Name   string
-	Region string
+	Name      string
+	URL       string
+	Region    string
+	RegionURL string
 }
 
 func fetch(uri string, data url.Values) ([]byte, error) {
@@ -57,15 +59,17 @@ func fetch(uri string, data url.Values) ([]byte, error) {
 	return body, nil
 }
 
-func ListResorts(country string) ([]string, error) {
+func ListResorts(country string) (map[string]*Resort, error) {
 	logrus.Debugf("Retrieve resorts for country: %s", country)
-	resorts := []string{}
+	resorts := map[string]*Resort{}
 	uri := fmt.Sprintf(countryResortsURL, country)
 	body, err := fetch(uri, url.Values{})
 	if err != nil {
 		return nil, err
 	}
 	z := html.NewTokenizer(strings.NewReader(string(body)))
+	var name string
+	var url string
 	for {
 		// token type
 		tokenType := z.Next()
@@ -76,15 +80,32 @@ func ListResorts(country string) ([]string, error) {
 		switch tokenType {
 		case html.StartTagToken: // <tag>
 			t := z.Token()
+
 			if t.Data == "div" {
 				if len(t.Attr) > 0 && t.Attr[0].Val == "name" {
 					z.Next()
 					link := z.Token()
 					// fmt.Printf("Resort link: %s %s\n", link, link.Attr)
 					if len(link.Attr) > 1 && link.Attr[1].Key == "title" {
-						logrus.Debugf("Resort: %s\n", link.Attr[1].Val)
-						resorts = append(resorts, link.Attr[1].Val)
+						name = link.Attr[1].Val
+						url = link.Attr[0].Val
+						// fmt.Printf("Resort name: %s\n", name)
 					}
+				} else if len(t.Attr) > 0 && t.Attr[0].Val == "rRegion" {
+					z.Next()
+					link := z.Token()
+					if len(link.Attr) > 1 && link.Attr[1].Key == "title" {
+						regionName := link.Attr[1].Val
+						regionUrl := link.Attr[0].Val
+						// fmt.Printf("Resort region: %s %s\n", name, regionName)
+						resorts[name] = &Resort{
+							Name:      name,
+							URL:       url,
+							Region:    regionName,
+							RegionURL: regionUrl,
+						}
+					}
+
 				}
 
 			}

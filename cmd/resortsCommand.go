@@ -36,13 +36,13 @@ var resortsListCommand = cli.Command{
 	Action: func(context *cli.Context) error {
 
 		fmt.Println("Resorts:")
-		names, err := skiinfo.ListResorts("france")
+		resorts, err := skiinfo.ListResorts("france")
 		if err != nil {
 			fmt.Printf("ERROR: %s", err)
 			return nil
 		}
-		for _, name := range names {
-			fmt.Printf("- %s\n", name)
+		for _, resort := range resorts {
+			fmt.Printf("- %s [%s]\n", resort.Name, resort.Region)
 		}
 		return nil
 	},

@@ -16,7 +16,9 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
+	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli"
 
 	"github.com/nlamirault/chione/skiinfo"
@@ -50,18 +52,37 @@ var resortDescribeCommand = cli.Command{
 		if !context.IsSet("region") {
 			return fmt.Errorf("Please specify the region to used via the --region option")
 		}
-		resort, err := skiinfo.GetResort(context.String("resort"), context.String("region"))
-		if err != nil {
-			fmt.Println(redOut(err))
-			return nil
-		}
-		fmt.Printf("Resort:\n")
-		fmt.Printf(greenOut("Status: "))
-		fmt.Printf("%s\n", resort.Status)
-		fmt.Printf("Snow depth piste: low:%s, middle:%s, up:%s\n",
-			resort.Piste.Lower, resort.Piste.Middle, resort.Piste.Upper)
-		fmt.Printf("Snow depth off-piste: low:%s, middle:%s, up:%s\n",
-			resort.OffPiste.Lower, resort.OffPiste.Middle, resort.OffPiste.Upper)
+		describeSkiResort(context.String("resort"), context.String("region"))
 		return nil
 	},
+}
+
+func describeSkiResort(name string, region string) {
+	resort, err := skiinfo.GetResort(name, region)
+	if err != nil {
+		fmt.Println(redOut(err))
+		return
+	}
+	// fmt.Printf("Resort:\n")
+	table := tablewriter.NewWriter(os.Stdout)
+	// table.SetHeader([]string{"", "Club 1", "Club 2", "Score", "Commentaire"})
+	table.SetRowLine(true)
+	table.SetAutoWrapText(false)
+	content := []string{"", "", "", ""}
+	content[0] = yellowOut("Status")
+	content[1] = resort.Status
+	table.Append(content)
+	content = []string{"", "", "", ""}
+	content[0] = yellowOut("Snow depth Piste")
+	content[1] = fmt.Sprintf("low: %s", resort.Piste.Lower)
+	content[2] = fmt.Sprintf("middle: %s", resort.Piste.Middle)
+	content[3] = fmt.Sprintf("upper: %s", resort.Piste.Upper)
+	table.Append(content)
+	content = []string{"", "", "", ""}
+	content[0] = yellowOut("Snow depth Off-Piste")
+	content[1] = fmt.Sprintf("low: %s", resort.OffPiste.Lower)
+	content[2] = fmt.Sprintf("middle: %s", resort.OffPiste.Middle)
+	content[3] = fmt.Sprintf("upper: %s", resort.OffPiste.Upper)
+	table.Append(content)
+	table.Render()
 }

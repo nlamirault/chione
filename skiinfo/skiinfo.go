@@ -209,32 +209,38 @@ func GetResort(name string, region string) (*ResortDescription, error) {
 				}
 			} else if t.Data == "div" {
 				if len(t.Attr) > 0 {
-					inner := z.Next()
-					if inner == html.TextToken {
+					if t.Attr[0].Val == "time" {
 						text := (string)(z.Text())
 						value := strings.TrimSpace(text)
-						if t.Attr[0].Val == "bluePill" {
-							if elevationUpperState {
-								if snowDepth == 1 {
-									resortDesc.Piste.Upper = value
-								} else if snowDepth == 2 {
-									resortDesc.OffPiste.Upper = value
+						fmt.Printf("===> %s\n", value)
+					} else {
+						inner := z.Next()
+						if inner == html.TextToken {
+							text := (string)(z.Text())
+							value := strings.TrimSpace(text)
+							if t.Attr[0].Val == "bluePill" {
+								if elevationUpperState {
+									if snowDepth == 1 {
+										resortDesc.Piste.Upper = value
+									} else if snowDepth == 2 {
+										resortDesc.OffPiste.Upper = value
+									}
+									elevationUpperState = false
+								} else if elevationMiddleState {
+									if snowDepth == 1 {
+										resortDesc.Piste.Middle = value
+									} else if snowDepth == 2 {
+										resortDesc.OffPiste.Middle = value
+									}
+									elevationMiddleState = false
+								} else if elevationLowerState {
+									if snowDepth == 1 {
+										resortDesc.Piste.Lower = value
+									} else if snowDepth == 2 {
+										resortDesc.OffPiste.Lower = value
+									}
+									elevationLowerState = false
 								}
-								elevationUpperState = false
-							} else if elevationMiddleState {
-								if snowDepth == 1 {
-									resortDesc.Piste.Middle = value
-								} else if snowDepth == 2 {
-									resortDesc.OffPiste.Middle = value
-								}
-								elevationMiddleState = false
-							} else if elevationLowerState {
-								if snowDepth == 1 {
-									resortDesc.Piste.Lower = value
-								} else if snowDepth == 2 {
-									resortDesc.OffPiste.Lower = value
-								}
-								elevationLowerState = false
 							}
 						}
 					}

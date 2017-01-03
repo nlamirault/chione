@@ -33,10 +33,18 @@ var ResortsCommand = cli.Command{
 var resortsListCommand = cli.Command{
 	Name:  "list",
 	Usage: "List all resorts",
+	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "country",
+			Usage: "Country name to used (like france)",
+		},
+	},
 	Action: func(context *cli.Context) error {
-
+		if !context.IsSet("country") {
+			return fmt.Errorf("Please specify the country to use via the --country option")
+		}
 		fmt.Println("Resorts:")
-		resorts, err := skiinfo.ListResorts("france")
+		resorts, err := skiinfo.ListResorts(context.String("country"))
 		if err != nil {
 			fmt.Printf("ERROR: %s", err)
 			return nil

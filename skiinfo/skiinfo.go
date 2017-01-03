@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	baseURL           = "http://www.skiinfo.fr"
+	resortURL         = "http://www.skiinfo.fr/%s/%s/bulletin-neige.html"
 	countryResortsURL = "http://www.skiinfo.fr/%s/stations-de-ski.html"
 )
 
@@ -36,6 +36,27 @@ type Resort struct {
 	URL       string
 	Region    string
 	RegionURL string
+}
+
+type SnowDepth struct {
+	Upper  string
+	Middle string
+	Lower  string
+}
+
+type Weather struct {
+	Type          string
+	Temperature   string
+	WindDirection string
+	WindForce     string
+}
+
+type ResortDescription struct {
+	Status         string
+	Piste          *SnowDepth
+	OffPiste       *SnowDepth
+	SummmitWeather *Weather
+	BaseWeather    *Weather
 }
 
 func fetch(uri string, data url.Values) ([]byte, error) {
@@ -116,4 +137,113 @@ func ListResorts(country string) (map[string]*Resort, error) {
 	}
 
 	return resorts, nil
+}
+
+func GetResort(name string, region string) (*ResortDescription, error) {
+	logrus.Debugf("Retrieve resort: %s %s", name, region)
+
+	uri := fmt.Sprintf(resortURL, region, name)
+	body, err := fetch(uri, url.Values{})
+	if err != nil {
+		return nil, err
+	}
+	resortDesc := &ResortDescription{
+		OffPiste:       &SnowDepth{},
+		Piste:          &SnowDepth{},
+		BaseWeather:    &Weather{},
+		SummmitWeather: &Weather{},
+	}
+	snowDepth := 0
+	// snowFall := false
+	weather := 0
+	elevationUpperState := false
+	elevationMiddleState := false
+	elevationLowerState := false
+
+	z := html.NewTokenizer(strings.NewReader(string(body)))
+	for {
+		// token type
+		tokenType := z.Next()
+		if tokenType == html.ErrorToken {
+			break
+		}
+		// token := z.Token()
+		switch tokenType {
+		case html.StartTagToken: // <tag>
+			t := z.Token()
+			if t.Data == "span" {
+				if len(t.Attr) > 0 && strings.Contains(t.Attr[0].Val, "current_status") {
+					inner := z.Next()
+					if inner == html.TextToken {
+						text := (string)(z.Text())
+						value := strings.TrimSpace(text)
+						// fmt.Printf("Status: %s\n", value)
+						resortDesc.Status = value
+					}
+				}
+			} else if t.Data == "ul" {
+				if len(t.Attr) > 0 {
+					if strings.Contains(t.Attr[0].Val, "sr_snowfall") {
+						// snowFall = true
+					} else if strings.Contains(t.Attr[0].Val, "sr_snow_depth_stations") {
+						snowDepth += 1
+					} else if strings.Contains(t.Attr[0].Val, "sr_weather_table") {
+						weather += 1
+					}
+				}
+			} else if t.Data == "li" {
+				if len(t.Attr) > 0 {
+					if t.Attr[0].Val == "elevation upper" {
+						elevationUpperState = true
+						elevationMiddleState = false
+						elevationLowerState = false
+					} else if t.Attr[0].Val == "elevation middle" {
+						elevationMiddleState = true
+						elevationLowerState = false
+						elevationUpperState = false
+					} else if t.Attr[0].Val == "elevation lower" {
+						elevationLowerState = true
+						elevationUpperState = false
+						elevationMiddleState = false
+					}
+				}
+			} else if t.Data == "div" {
+				if len(t.Attr) > 0 {
+					inner := z.Next()
+					if inner == html.TextToken {
+						text := (string)(z.Text())
+						value := strings.TrimSpace(text)
+						if t.Attr[0].Val == "bluePill" {
+							if elevationUpperState {
+								if snowDepth == 1 {
+									resortDesc.Piste.Upper = value
+								} else if snowDepth == 2 {
+									resortDesc.OffPiste.Upper = value
+								}
+								elevationUpperState = false
+							} else if elevationMiddleState {
+								if snowDepth == 1 {
+									resortDesc.Piste.Middle = value
+								} else if snowDepth == 2 {
+									resortDesc.OffPiste.Middle = value
+								}
+								elevationMiddleState = false
+							} else if elevationLowerState {
+								if snowDepth == 1 {
+									resortDesc.Piste.Lower = value
+								} else if snowDepth == 2 {
+									resortDesc.OffPiste.Lower = value
+								}
+								elevationLowerState = false
+							}
+						}
+					}
+				}
+			}
+		case html.TextToken: // text between start and end tag
+		case html.EndTagToken: // </tag>
+		case html.SelfClosingTagToken: // <tag/>
+		}
+	}
+	return resortDesc, err
 }

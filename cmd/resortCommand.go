@@ -18,6 +18,8 @@ import (
 	"fmt"
 
 	"github.com/urfave/cli"
+
+	"github.com/nlamirault/chione/skiinfo"
 )
 
 // ResortCommand is the command which manage a resort
@@ -34,18 +36,31 @@ var resortDescribeCommand = cli.Command{
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "resort",
-			Usage: "the id of the resort",
+			Usage: "the resort name",
+		},
+		cli.StringFlag{
+			Name:  "region",
+			Usage: "the region name",
 		},
 	},
 	Action: func(context *cli.Context) error {
 		if !context.IsSet("resort") {
-			return fmt.Errorf("Please specify the id of the resort to used via the --resort option")
+			return fmt.Errorf("Please specify the resort to used via the --resort option")
 		}
-		// resort, err := resorts.New(context.String("resort"))
-		// if err != nil {
-		// 	return err
-		// }
-		// resorts.Describe(resort)
+		if !context.IsSet("region") {
+			return fmt.Errorf("Please specify the region to used via the --region option")
+		}
+		resort, err := skiinfo.GetResort(context.String("resort"), context.String("region"))
+		if err != nil {
+			fmt.Println(redOut(err))
+			return nil
+		}
+		fmt.Printf("Resort:\n")
+		fmt.Printf("Status: %s\n", resort.Status)
+		fmt.Printf("Snow depth piste: low:%s, middle:%s, up:%s\n",
+			resort.Piste.Lower, resort.Piste.Middle, resort.Piste.Upper)
+		fmt.Printf("Snow depth off-piste: low:%s, middle:%s, up:%s\n",
+			resort.OffPiste.Lower, resort.OffPiste.Middle, resort.OffPiste.Upper)
 		return nil
 	},
 }

@@ -46,11 +46,11 @@ var resortsListCommand = cli.Command{
 		fmt.Println("Resorts:")
 		resorts, err := skiinfo.ListResorts(context.String("country"))
 		if err != nil {
-			fmt.Printf("ERROR: %s", err)
+			fmt.Println(redOut(err))
 			return nil
 		}
 		for _, resort := range resorts {
-			fmt.Printf("- %s [%s]\n", resort.Name, resort.Region)
+			fmt.Printf("- %s [%s]\n", skiinfo.MakeResortName(resort.Name), skiinfo.MakeResortName(resort.Region))
 		}
 		return nil
 	},

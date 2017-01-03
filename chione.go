@@ -34,7 +34,7 @@ func main() {
 	app.Commands = []cli.Command{
 		cmd.VersionCommand,
 		cmd.ResortsCommand,
-		// cmd.ResortCommand,
+		cmd.ResortCommand,
 	}
 
 	app.Flags = []cli.Flag{

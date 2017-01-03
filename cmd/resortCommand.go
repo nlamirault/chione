@@ -56,7 +56,8 @@ var resortDescribeCommand = cli.Command{
 			return nil
 		}
 		fmt.Printf("Resort:\n")
-		fmt.Printf("Status: %s\n", resort.Status)
+		fmt.Printf(greenOut("Status: "))
+		fmt.Printf("%s\n", resort.Status)
 		fmt.Printf("Snow depth piste: low:%s, middle:%s, up:%s\n",
 			resort.Piste.Lower, resort.Piste.Middle, resort.Piste.Upper)
 		fmt.Printf("Snow depth off-piste: low:%s, middle:%s, up:%s\n",

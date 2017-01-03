@@ -212,7 +212,7 @@ func GetResort(name string, region string) (*ResortDescription, error) {
 					if t.Attr[0].Val == "time" {
 						text := (string)(z.Text())
 						value := strings.TrimSpace(text)
-						fmt.Printf("===> %s\n", value)
+						fmt.Printf("===> %s %s\n", value, t)
 					} else {
 						inner := z.Next()
 						if inner == html.TextToken {

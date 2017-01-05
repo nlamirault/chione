@@ -9,10 +9,7 @@ machine:
 
 dependencies:
   post:
-    - go get github.com/golang/glog
-    - go get github.com/constabulary/gb/...
-    - go get github.com/golang/lint/golint
-    - go get github.com/kisielk/errcheck
+    - make init
 
 test:
   pre:

@@ -34,7 +34,7 @@ GOX_ARGS = "-output={{.Dir}}-$(VERSION)_{{.OS}}_{{.Arch}}"
 
 BINTRAY_URI = https://api.bintray.com
 BINTRAY_USERNAME = nlamirault
-BINTRAY_ORG = pilotariak
+BINTRAY_ORG = nlamirault
 BINTRAY_REPOSITORY= oss
 
 NO_COLOR=\033[0m

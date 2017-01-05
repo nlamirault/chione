@@ -58,13 +58,19 @@ type Slopes struct {
 	Expert       bytes.Buffer
 }
 
+type SnowFall struct {
+	Day  string
+	Date string
+	Snow string
+}
+
 type ResortDescription struct {
 	Status         string
 	Piste          *SnowDepth
 	OffPiste       *SnowDepth
 	SummmitWeather *Weather
 	BaseWeather    *Weather
-	SnowFall       map[string]string
+	SnowFallDays   []*SnowFall
 	Slopes         *Slopes
 }
 
@@ -168,7 +174,7 @@ func GetResort(name string, region string) (*ResortDescription, error) {
 		Piste:          &SnowDepth{},
 		BaseWeather:    &Weather{},
 		SummmitWeather: &Weather{},
-		SnowFall:       map[string]string{},
+		SnowFallDays:   []*SnowFall{},
 		Slopes:         &Slopes{},
 	}
 	snowDepth := 0
@@ -181,7 +187,7 @@ func GetResort(name string, region string) (*ResortDescription, error) {
 	slopesIntermediate := false
 	slopesAdvanced := false
 	slopesExpert := false
-	day := ""
+	snowDay := 0
 	z := html.NewTokenizer(strings.NewReader(string(body)))
 	for {
 		// token type
@@ -258,8 +264,11 @@ func GetResort(name string, region string) (*ResortDescription, error) {
 					if t.Attr[0].Val == "time" {
 						inner := z.Next()
 						if inner == html.TextToken {
-							day = extractTextTag(z)
-							resortDesc.SnowFall[day] = ""
+							resortDesc.SnowFallDays = append(resortDesc.SnowFallDays, &SnowFall{
+								Day: extractTextTag(z),
+							})
+							// fmt.Printf("==> %d %s\n", snowDay, resortDesc.SnowFallDays)
+
 						}
 					} else if t.Attr[0].Val == "predicted_snowfall" {
 						// snowFall += 1
@@ -291,8 +300,9 @@ func GetResort(name string, region string) (*ResortDescription, error) {
 									}
 									elevationLowerState = false
 								} else {
-									// fmt.Printf("Snow: %s\n", value)
-									resortDesc.SnowFall[day] = value
+									resortDesc.SnowFallDays[snowDay].Snow = value
+									// fmt.Printf("Snow: %d %s\n", snowDay, resortDesc.SnowFallDays)
+									snowDay += 1
 								}
 							}
 						}

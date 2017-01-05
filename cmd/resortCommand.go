@@ -96,11 +96,11 @@ func describeSkiResort(name string, region string) {
 	content = []string{"", ""}
 	content[0] = yellowOut("Chute de neige") //"Snowfall")
 	buffer.Reset()
-	for k, v := range resort.SnowFall {
-		if len(k) == 0 {
-			k = "aujourd'hui"
+	for _, snowfall := range resort.SnowFallDays {
+		if len(snowfall.Day) == 0 {
+			snowfall.Day = "aujourd'hui"
 		}
-		buffer.WriteString(fmt.Sprintf("- %s: %s\n", k, v))
+		buffer.WriteString(fmt.Sprintf("- %s: %s\n", snowfall.Day, snowfall.Snow))
 	}
 	content[1] = buffer.String()
 	table.Append(content)

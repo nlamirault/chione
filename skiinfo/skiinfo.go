@@ -172,7 +172,7 @@ func GetResort(name string, region string) (*ResortDescription, error) {
 		Slopes:         &Slopes{},
 	}
 	snowDepth := 0
-	snowFall := 0
+	// snowFall := 0
 	weather := 0
 	elevationUpperState := false
 	elevationMiddleState := false
@@ -193,7 +193,7 @@ func GetResort(name string, region string) (*ResortDescription, error) {
 		switch tokenType {
 		case html.StartTagToken: // <tag>
 			t := z.Token()
-			fmt.Sprintf("T: %s", t)
+			// fmt.Printf("Token: %s", t)
 			if t.Data == "span" {
 				if len(t.Attr) > 0 && strings.Contains(t.Attr[0].Val, "current_status") {
 					inner := z.Next()
@@ -203,9 +203,10 @@ func GetResort(name string, region string) (*ResortDescription, error) {
 				}
 			} else if t.Data == "ul" {
 				if len(t.Attr) > 0 {
-					if strings.Contains(t.Attr[0].Val, "sr_snowfall") {
-						// snowFall = true
-					} else if strings.Contains(t.Attr[0].Val, "sr_snow_depth_stations") {
+					// if strings.Contains(t.Attr[0].Val, "sr_snowfall") {
+					// 	// snowFall = true
+					// } else
+					if strings.Contains(t.Attr[0].Val, "sr_snow_depth_stations") {
 						snowDepth += 1
 					} else if strings.Contains(t.Attr[0].Val, "sr_weather_table") {
 						weather += 1
@@ -257,14 +258,11 @@ func GetResort(name string, region string) (*ResortDescription, error) {
 					if t.Attr[0].Val == "time" {
 						inner := z.Next()
 						if inner == html.TextToken {
-							text := (string)(z.Text())
-							value := strings.TrimSpace(text)
-							// fmt.Printf("===> Snow day %s\n", value)
-							day = value
+							day = extractTextTag(z)
 							resortDesc.SnowFall[day] = ""
 						}
 					} else if t.Attr[0].Val == "predicted_snowfall" {
-						snowFall += 1
+						// snowFall += 1
 					} else {
 						inner := z.Next()
 						if inner == html.TextToken {

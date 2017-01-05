@@ -51,12 +51,21 @@ type Weather struct {
 	WindForce     string
 }
 
+type Slopes struct {
+	Beginning    bytes.Buffer
+	Intermediate bytes.Buffer
+	Advanced     bytes.Buffer
+	Expert       bytes.Buffer
+}
+
 type ResortDescription struct {
 	Status         string
 	Piste          *SnowDepth
 	OffPiste       *SnowDepth
 	SummmitWeather *Weather
 	BaseWeather    *Weather
+	SnowFall       map[string]string
+	Slopes         *Slopes
 }
 
 func fetch(uri string, data url.Values) ([]byte, error) {
@@ -78,6 +87,13 @@ func fetch(uri string, data url.Values) ([]byte, error) {
 		return nil, fmt.Errorf("errorination happened reading the body: %s", err.Error())
 	}
 	return body, nil
+}
+
+func extractTextTag(z *html.Tokenizer) string {
+	text := (string)(z.Text())
+	value := strings.TrimSpace(text)
+	// fmt.Printf("Val: %s\n", value)
+	return value
 }
 
 func ListResorts(country string) (map[string]*Resort, error) {
@@ -152,14 +168,20 @@ func GetResort(name string, region string) (*ResortDescription, error) {
 		Piste:          &SnowDepth{},
 		BaseWeather:    &Weather{},
 		SummmitWeather: &Weather{},
+		SnowFall:       map[string]string{},
+		Slopes:         &Slopes{},
 	}
 	snowDepth := 0
-	// snowFall := false
+	snowFall := 0
 	weather := 0
 	elevationUpperState := false
 	elevationMiddleState := false
 	elevationLowerState := false
-
+	slopesBeginning := false
+	slopesIntermediate := false
+	slopesAdvanced := false
+	slopesExpert := false
+	day := ""
 	z := html.NewTokenizer(strings.NewReader(string(body)))
 	for {
 		// token type
@@ -171,14 +193,12 @@ func GetResort(name string, region string) (*ResortDescription, error) {
 		switch tokenType {
 		case html.StartTagToken: // <tag>
 			t := z.Token()
+			fmt.Sprintf("T: %s", t)
 			if t.Data == "span" {
 				if len(t.Attr) > 0 && strings.Contains(t.Attr[0].Val, "current_status") {
 					inner := z.Next()
 					if inner == html.TextToken {
-						text := (string)(z.Text())
-						value := strings.TrimSpace(text)
-						// fmt.Printf("Status: %s\n", value)
-						resortDesc.Status = value
+						resortDesc.Status = extractTextTag(z)
 					}
 				}
 			} else if t.Data == "ul" {
@@ -207,12 +227,44 @@ func GetResort(name string, region string) (*ResortDescription, error) {
 						elevationMiddleState = false
 					}
 				}
+			} else if t.Data == "p" {
+				if len(t.Attr) > 0 {
+					// fmt.Printf("=> %s %s\n", t, t.Attr)
+					if strings.Contains(t.Attr[0].Val, "beginner") {
+						slopesBeginning = true
+						slopesIntermediate = false
+						slopesAdvanced = false
+						slopesExpert = false
+					} else if strings.Contains(t.Attr[0].Val, "intermediate") {
+						slopesIntermediate = true
+						slopesBeginning = false
+						slopesAdvanced = false
+						slopesExpert = false
+					} else if strings.Contains(t.Attr[0].Val, "advanced") {
+						slopesAdvanced = true
+						slopesBeginning = false
+						slopesIntermediate = false
+						slopesExpert = false
+					} else if strings.Contains(t.Attr[0].Val, "expert") {
+						slopesExpert = true
+						slopesBeginning = false
+						slopesAdvanced = false
+						slopesIntermediate = false
+					}
+				}
 			} else if t.Data == "div" {
 				if len(t.Attr) > 0 {
 					if t.Attr[0].Val == "time" {
-						text := (string)(z.Text())
-						value := strings.TrimSpace(text)
-						fmt.Printf("===> %s %s\n", value, t)
+						inner := z.Next()
+						if inner == html.TextToken {
+							text := (string)(z.Text())
+							value := strings.TrimSpace(text)
+							// fmt.Printf("===> Snow day %s\n", value)
+							day = value
+							resortDesc.SnowFall[day] = ""
+						}
+					} else if t.Attr[0].Val == "predicted_snowfall" {
+						snowFall += 1
 					} else {
 						inner := z.Next()
 						if inner == html.TextToken {
@@ -240,6 +292,9 @@ func GetResort(name string, region string) (*ResortDescription, error) {
 										resortDesc.OffPiste.Lower = value
 									}
 									elevationLowerState = false
+								} else {
+									// fmt.Printf("Snow: %s\n", value)
+									resortDesc.SnowFall[day] = value
 								}
 							}
 						}
@@ -247,7 +302,30 @@ func GetResort(name string, region string) (*ResortDescription, error) {
 				}
 			}
 		case html.TextToken: // text between start and end tag
+			text := extractTextTag(z)
+			if len(text) > 0 {
+				if slopesBeginning {
+					resortDesc.Slopes.Beginning.WriteString(text)
+					// fmt.Printf("Begin: %s\n", text)
+				} else if slopesIntermediate {
+					resortDesc.Slopes.Intermediate.WriteString(text)
+					// fmt.Printf("Intermediate: %s\n", text)
+				} else if slopesAdvanced {
+					resortDesc.Slopes.Advanced.WriteString(text)
+					// fmt.Printf("Advanced: %s\n", text)
+				} else if slopesExpert {
+					resortDesc.Slopes.Expert.WriteString(text)
+					// fmt.Printf("Expert: %s\n", text)
+				}
+			}
 		case html.EndTagToken: // </tag>
+			t := z.Token()
+			if t.Data == "p" {
+				slopesExpert = false
+				slopesBeginning = false
+				slopesAdvanced = false
+				slopesIntermediate = false
+			}
 		case html.SelfClosingTagToken: // <tag/>
 		}
 	}

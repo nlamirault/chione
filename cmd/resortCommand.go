@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 
@@ -68,21 +69,51 @@ func describeSkiResort(name string, region string) {
 	// table.SetHeader([]string{"", "Club 1", "Club 2", "Score", "Commentaire"})
 	table.SetRowLine(true)
 	table.SetAutoWrapText(false)
-	content := []string{"", "", "", ""}
+
+	content := []string{"", ""}
 	content[0] = yellowOut("Status")
 	content[1] = resort.Status
 	table.Append(content)
-	content = []string{"", "", "", ""}
-	content[0] = yellowOut("Snow depth Piste")
-	content[1] = fmt.Sprintf("low: %s", resort.Piste.Lower)
-	content[2] = fmt.Sprintf("middle: %s", resort.Piste.Middle)
-	content[3] = fmt.Sprintf("upper: %s", resort.Piste.Upper)
+
+	content = []string{"", ""}
+	content[0] = yellowOut("Enneigement sur les pistes") //"Snow depth Piste")
+	var buffer bytes.Buffer
+	buffer.WriteString(fmt.Sprintf("- bas: %s\n", resort.Piste.Lower))
+	buffer.WriteString(fmt.Sprintf("- milieu: %s\n", resort.Piste.Middle))
+	buffer.WriteString(fmt.Sprintf("- haut: %s\n", resort.Piste.Upper))
+	content[1] = buffer.String()
 	table.Append(content)
-	content = []string{"", "", "", ""}
-	content[0] = yellowOut("Snow depth Off-Piste")
-	content[1] = fmt.Sprintf("low: %s", resort.OffPiste.Lower)
-	content[2] = fmt.Sprintf("middle: %s", resort.OffPiste.Middle)
-	content[3] = fmt.Sprintf("upper: %s", resort.OffPiste.Upper)
+
+	content = []string{"", ""}
+	content[0] = yellowOut("Enneigement hors-pistes") // "Snow depth Off-Piste")
+	buffer.Reset()
+	buffer.WriteString(fmt.Sprintf("- bas: %s\n", resort.OffPiste.Lower))
+	buffer.WriteString(fmt.Sprintf("- milieu: %s\n", resort.OffPiste.Middle))
+	buffer.WriteString(fmt.Sprintf("- haut: %s\n", resort.OffPiste.Upper))
+	content[1] = buffer.String()
 	table.Append(content)
+
+	content = []string{"", ""}
+	content[0] = yellowOut("Chute de neige") //"Snowfall")
+	buffer.Reset()
+	for k, v := range resort.SnowFall {
+		if len(k) == 0 {
+			k = "aujourd'hui"
+		}
+		buffer.WriteString(fmt.Sprintf("- %s: %s\n", k, v))
+	}
+	content[1] = buffer.String()
+	table.Append(content)
+
+	content = []string{"", ""}
+	content[0] = yellowOut("Domaine skiable") //"Terrain")
+	buffer.Reset()
+	buffer.WriteString(fmt.Sprintf("- Vertes: %s\n", resort.Slopes.Beginning.String()))
+	buffer.WriteString(fmt.Sprintf("- Bleues: %s\n", resort.Slopes.Intermediate.String()))
+	buffer.WriteString(fmt.Sprintf("- Rouges: %s\n", resort.Slopes.Advanced.String()))
+	buffer.WriteString(fmt.Sprintf("- Noires: %s\n", resort.Slopes.Expert.String()))
+	content[1] = buffer.String()
+	table.Append(content)
+
 	table.Render()
 }

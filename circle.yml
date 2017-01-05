@@ -17,5 +17,5 @@ test:
   override:
     - mkdir -p ~/.go_workspace/src/github.com/nlamirault
     - ln -s ~/chione ~/.go_workspace/src/github.com/nlamirault/
-    - cd ~/.go_workspace/src/github.com/nlamirault/chione && make init deps build
+    - cd ~/.go_workspace/src/github.com/nlamirault/chione && make build
     - cd ~/.go_workspace/src/github.com/nlamirault/chione && make test lint vet coverage

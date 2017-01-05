@@ -1,6 +1,6 @@
 machine:
   pre:
-    - curl -o go.tar.gz -sL https://golang.org/dl/go1.5.linux-amd64.tar.gz
+    - curl -o go.tar.gz -sL https://golang.org/dl/go1.7.4.linux-amd64.tar.gz
     - sudo rm -rf /usr/local/go
     - sudo tar -C /usr/local -xzf go.tar.gz
     - sudo chmod a+w /usr/local/go/src/
@@ -15,8 +15,6 @@ test:
   pre:
     - go version
   override:
-    - make build
-    - make test
-    - make lint
-    - make vet
-    - make coverage
+    - ln -s ~/chione ~/.go_workspace/src/github.com/nlamirault/
+    - cd ~/.go_workspace/src/github.com/nlamirault/chione && make init deps build
+    - cd ~/.go_workspace/src/github.com/nlamirault/chione && make test lint vet coverage

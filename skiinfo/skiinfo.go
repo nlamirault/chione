@@ -209,9 +209,6 @@ func GetResort(name string, region string) (*ResortDescription, error) {
 				}
 			} else if t.Data == "ul" {
 				if len(t.Attr) > 0 {
-					// if strings.Contains(t.Attr[0].Val, "sr_snowfall") {
-					// 	// snowFall = true
-					// } else
 					if strings.Contains(t.Attr[0].Val, "sr_snow_depth_stations") {
 						snowDepth += 1
 					} else if strings.Contains(t.Attr[0].Val, "sr_weather_table") {

@@ -15,8 +15,13 @@
 package metrics
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/log"
+
+	"github.com/nlamirault/chione/skiinfo"
 )
 
 const (
@@ -24,20 +29,23 @@ const (
 )
 
 var (
+
+	// Snow depths
+
 	lower = prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "lower"),
 		"Snow depths at the lower of the ski resort",
-		nil, nil,
+		[]string{"name"}, nil,
 	)
 	middle = prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "middle"),
 		"Snow depths in the middle of the ski resort",
-		nil, nil,
+		[]string{"name"}, nil,
 	)
 	upper = prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "upper"),
 		"Snow depths at the upper of the ski resort).",
-		nil, nil,
+		[]string{"name"}, nil,
 	)
 )
 
@@ -71,5 +79,39 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	log.Infof("Exporter starting")
 
-	log.Infof("Speedtest exporter finished")
+	resort, err := skiinfo.GetResort(e.SkiResortName, e.SkiResortRegion)
+	if err != nil {
+		log.Errorf("Can't retrive metrics: %s", err.Error())
+		return
+	}
+	log.Infof("Ski resort informations: %s", resort.Piste)
+
+	if len(resort.Piste.Lower) > 0 {
+		lowerVal, err := strconv.ParseFloat(strings.Replace(resort.Piste.Lower, "cm", "", -1), 64)
+		if err != nil {
+			log.Errorf("Can't parse value : %s %s %d", e.SkiResortRegion, e.SkiResortName, resort.Piste.Lower)
+			return
+		}
+		ch <- prometheus.MustNewConstMetric(lower, prometheus.GaugeValue, lowerVal, e.SkiResortName)
+	}
+
+	if len(resort.Piste.Middle) > 0 {
+		middleVal, err := strconv.ParseFloat(strings.Replace(resort.Piste.Middle, "cm", "", -1), 64)
+		if err != nil {
+			log.Errorf("Can't parse value : %s %s %d", e.SkiResortRegion, e.SkiResortName, resort.Piste.Middle)
+			return
+		}
+		ch <- prometheus.MustNewConstMetric(middle, prometheus.GaugeValue, middleVal, e.SkiResortName)
+	}
+
+	if len(resort.Piste.Upper) > 0 {
+		upperVal, err := strconv.ParseFloat(strings.Replace(resort.Piste.Upper, "cm", "", -1), 64)
+		if err != nil {
+			log.Errorf("Can't parse value : %s %s %d", e.SkiResortRegion, e.SkiResortName, resort.Piste.Upper)
+			return
+		}
+		ch <- prometheus.MustNewConstMetric(upper, prometheus.GaugeValue, upperVal, e.SkiResortName)
+	}
+
+	log.Infof("Exporter finished")
 }

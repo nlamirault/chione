@@ -113,75 +113,41 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 
 func (e *Exporter) collectSnowDepth(ch chan<- prometheus.Metric, resort *skiinfo.ResortDescription) {
 	log.Infof("Ski resort informations: %s", resort.Piste)
+	e.addSnowDepth(ch, lower, resort.Piste.Lower)
+	e.addSnowDepth(ch, middle, resort.Piste.Middle)
+	e.addSnowDepth(ch, upper, resort.Piste.Upper)
+}
 
-	if len(resort.Piste.Lower) > 0 {
-		lowerVal, err := strconv.ParseFloat(strings.Replace(resort.Piste.Lower, "cm", "", -1), 64)
+func (e *Exporter) addSnowDepth(ch chan<- prometheus.Metric, desc *prometheus.Desc, value string) {
+	if len(value) > 0 {
+		val, err := strconv.ParseFloat(strings.Replace(value, "cm", "", -1), 64)
 		if err != nil {
-			log.Errorf("Can't parse value : %s %s %d", e.SkiResortRegion, e.SkiResortName, resort.Piste.Lower)
+			log.Errorf("Can't parse value : %s %s %s", e.SkiResortRegion, e.SkiResortName, value)
 			return
 		}
-		ch <- prometheus.MustNewConstMetric(lower, prometheus.GaugeValue, lowerVal, e.SkiResortName)
+		log.Debugf("Add snow depth metric %d to desc %s", val, desc)
+		ch <- prometheus.MustNewConstMetric(desc, prometheus.GaugeValue, val, e.SkiResortName)
 	}
 
-	if len(resort.Piste.Middle) > 0 {
-		middleVal, err := strconv.ParseFloat(strings.Replace(resort.Piste.Middle, "cm", "", -1), 64)
-		if err != nil {
-			log.Errorf("Can't parse value : %s %s %d", e.SkiResortRegion, e.SkiResortName, resort.Piste.Middle)
-			return
-		}
-		ch <- prometheus.MustNewConstMetric(middle, prometheus.GaugeValue, middleVal, e.SkiResortName)
-	}
-
-	if len(resort.Piste.Upper) > 0 {
-		upperVal, err := strconv.ParseFloat(strings.Replace(resort.Piste.Upper, "cm", "", -1), 64)
-		if err != nil {
-			log.Errorf("Can't parse value : %s %s %d", e.SkiResortRegion, e.SkiResortName, resort.Piste.Upper)
-			return
-		}
-		ch <- prometheus.MustNewConstMetric(upper, prometheus.GaugeValue, upperVal, e.SkiResortName)
-	}
 }
 
 func (e *Exporter) collectSlopes(ch chan<- prometheus.Metric, resort *skiinfo.ResortDescription) {
-	beginnerSlopes := resort.Slopes.Beginning.String()
-	if len(beginnerSlopes) > 0 {
-		tokens := strings.Split(beginnerSlopes, "/")
-		val, err := strconv.ParseFloat(tokens[0], 64)
-		if err != nil {
-			log.Errorf("Can't parse value : %s %s %s %s", e.SkiResortRegion, e.SkiResortName, beginnerSlopes, tokens)
-			return
-		}
-		ch <- prometheus.MustNewConstMetric(beginner, prometheus.GaugeValue, val, e.SkiResortName)
-	}
-	intermediateSlopes := resort.Slopes.Intermediate.String()
-	if len(intermediateSlopes) > 0 {
-		tokens := strings.Split(intermediateSlopes, "/")
-		val, err := strconv.ParseFloat(tokens[0], 64)
-		if err != nil {
-			log.Errorf("Can't parse value : %s %s %s %s", e.SkiResortRegion, e.SkiResortName, intermediateSlopes, tokens)
-			return
-		}
-		ch <- prometheus.MustNewConstMetric(intermediate, prometheus.GaugeValue, val, e.SkiResortName)
-	}
-	advancedSlopes := resort.Slopes.Advanced.String()
-	if len(advancedSlopes) > 0 {
-		tokens := strings.Split(advancedSlopes, "/")
-		val, err := strconv.ParseFloat(tokens[0], 64)
-		if err != nil {
-			log.Errorf("Can't parse value : %s %s %s %s", e.SkiResortRegion, e.SkiResortName, advancedSlopes, tokens)
-			return
-		}
-		ch <- prometheus.MustNewConstMetric(advanced, prometheus.GaugeValue, val, e.SkiResortName)
-	}
-	exporterSlopes := resort.Slopes.Expert.String()
-	if len(exporterSlopes) > 0 {
-		tokens := strings.Split(exporterSlopes, "/")
-		val, err := strconv.ParseFloat(tokens[0], 64)
-		if err != nil {
-			log.Errorf("Can't parse value : %s %s %s %s", e.SkiResortRegion, e.SkiResortName, exporterSlopes, tokens)
-			return
-		}
-		ch <- prometheus.MustNewConstMetric(expert, prometheus.GaugeValue, val, e.SkiResortName)
-	}
+	log.Infof("Ski resort slopes: %s", resort.Slopes)
+	e.addSlopes(ch, beginner, resort.Slopes.Beginning.String())
+	e.addSlopes(ch, intermediate, resort.Slopes.Intermediate.String())
+	e.addSlopes(ch, advanced, resort.Slopes.Advanced.String())
+	e.addSlopes(ch, expert, resort.Slopes.Expert.String())
+}
 
+func (e *Exporter) addSlopes(ch chan<- prometheus.Metric, desc *prometheus.Desc, value string) {
+	if len(value) > 0 {
+		tokens := strings.Split(value, "/")
+		val, err := strconv.ParseFloat(tokens[0], 64)
+		if err != nil {
+			log.Errorf("Can't parse value : %s %s %s %s", e.SkiResortRegion, e.SkiResortName, value, tokens)
+			return
+		}
+		log.Debugf("Add slopes metric %d to desc %s", val, desc)
+		ch <- prometheus.MustNewConstMetric(desc, prometheus.GaugeValue, val, e.SkiResortName)
+	}
 }

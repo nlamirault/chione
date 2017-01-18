@@ -44,7 +44,30 @@ var (
 	)
 	upper = prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "upper"),
-		"Snow depths at the upper of the ski resort).",
+		"Snow depths at the upper of the ski resort.",
+		[]string{"name"}, nil,
+	)
+
+	// Slopes
+
+	beginner = prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "beginner"),
+		"Number of open beginner slopes.",
+		[]string{"name"}, nil,
+	)
+	intermediate = prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "intermediate"),
+		"Number of open intermediate slopes.",
+		[]string{"name"}, nil,
+	)
+	advanced = prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "advanced"),
+		"Number of open advanced slopes.",
+		[]string{"name"}, nil,
+	)
+	expert = prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "expert"),
+		"Number of open expert slopes.",
 		[]string{"name"}, nil,
 	)
 )
@@ -78,12 +101,17 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 // It implements prometheus.Collector.
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	log.Infof("Exporter starting")
-
 	resort, err := skiinfo.GetResort(e.SkiResortName, e.SkiResortRegion)
 	if err != nil {
 		log.Errorf("Can't retrive metrics: %s", err.Error())
 		return
 	}
+	e.collectSnowDepth(ch, resort)
+	e.collectSlopes(ch, resort)
+	log.Infof("Exporter finished")
+}
+
+func (e *Exporter) collectSnowDepth(ch chan<- prometheus.Metric, resort *skiinfo.ResortDescription) {
 	log.Infof("Ski resort informations: %s", resort.Piste)
 
 	if len(resort.Piste.Lower) > 0 {
@@ -112,6 +140,48 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		}
 		ch <- prometheus.MustNewConstMetric(upper, prometheus.GaugeValue, upperVal, e.SkiResortName)
 	}
+}
 
-	log.Infof("Exporter finished")
+func (e *Exporter) collectSlopes(ch chan<- prometheus.Metric, resort *skiinfo.ResortDescription) {
+	beginnerSlopes := resort.Slopes.Beginning.String()
+	if len(beginnerSlopes) > 0 {
+		tokens := strings.Split(beginnerSlopes, "/")
+		val, err := strconv.ParseFloat(tokens[0], 64)
+		if err != nil {
+			log.Errorf("Can't parse value : %s %s %s %s", e.SkiResortRegion, e.SkiResortName, beginnerSlopes, tokens)
+			return
+		}
+		ch <- prometheus.MustNewConstMetric(beginner, prometheus.GaugeValue, val, e.SkiResortName)
+	}
+	intermediateSlopes := resort.Slopes.Intermediate.String()
+	if len(intermediateSlopes) > 0 {
+		tokens := strings.Split(intermediateSlopes, "/")
+		val, err := strconv.ParseFloat(tokens[0], 64)
+		if err != nil {
+			log.Errorf("Can't parse value : %s %s %s %s", e.SkiResortRegion, e.SkiResortName, intermediateSlopes, tokens)
+			return
+		}
+		ch <- prometheus.MustNewConstMetric(intermediate, prometheus.GaugeValue, val, e.SkiResortName)
+	}
+	advancedSlopes := resort.Slopes.Advanced.String()
+	if len(advancedSlopes) > 0 {
+		tokens := strings.Split(advancedSlopes, "/")
+		val, err := strconv.ParseFloat(tokens[0], 64)
+		if err != nil {
+			log.Errorf("Can't parse value : %s %s %s %s", e.SkiResortRegion, e.SkiResortName, advancedSlopes, tokens)
+			return
+		}
+		ch <- prometheus.MustNewConstMetric(advanced, prometheus.GaugeValue, val, e.SkiResortName)
+	}
+	exporterSlopes := resort.Slopes.Expert.String()
+	if len(exporterSlopes) > 0 {
+		tokens := strings.Split(exporterSlopes, "/")
+		val, err := strconv.ParseFloat(tokens[0], 64)
+		if err != nil {
+			log.Errorf("Can't parse value : %s %s %s %s", e.SkiResortRegion, e.SkiResortName, exporterSlopes, tokens)
+			return
+		}
+		ch <- prometheus.MustNewConstMetric(expert, prometheus.GaugeValue, val, e.SkiResortName)
+	}
+
 }

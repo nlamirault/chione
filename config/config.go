@@ -1,4 +1,4 @@
-// Copyright (C) 2016, 2017 Nicolas Lamirault <nicolas.lamirault@gmail.com>
+// Copyright (C) 2017 Nicolas Lamirault <nicolas.lamirault@gmail.com>
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,14 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package config
 
 import (
-	"github.com/fatih/color"
+	"github.com/BurntSushi/toml"
 )
 
-var (
-	greenOut  = color.New(color.FgGreen).SprintFunc()
-	yellowOut = color.New(color.FgYellow).SprintFunc()
-	redOut    = color.New(color.FgRed).SprintFunc()
-)
+type SkiResort struct {
+	Name   string
+	Region string
+}
+
+// Configuration holds configuration for Chione
+type Configuration struct {
+	SkiResorts []SkiResort
+}
+
+// New returns a Configuration from reading the specified file (a toml file).
+func New(file string) (*Configuration, error) {
+	var configuration Configuration
+	if _, err := toml.DecodeFile(file, &configuration); err != nil {
+		return nil, err
+	}
+	return &configuration, nil
+}

@@ -57,7 +57,7 @@ You can download the binaries :
         [...]
 
 
-* Display informations about a leage:
+* Display informations about a ski resort:
 
         $ /chione --debug resort describe --resort val-thorens --region alpes-du-nord
         +----------------------------+--------------------------------+

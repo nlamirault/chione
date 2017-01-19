@@ -22,6 +22,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/urfave/cli"
 
+	"github.com/nlamirault/chione/config"
 	"github.com/nlamirault/chione/metrics"
 )
 
@@ -63,12 +64,8 @@ var metricsExportCommand = cli.Command{
 	Usage: "Export metrics for a ski resort",
 	Flags: []cli.Flag{
 		cli.StringFlag{
-			Name:  "resort",
-			Usage: "the resort name",
-		},
-		cli.StringFlag{
-			Name:  "region",
-			Usage: "the region name",
+			Name:  "config",
+			Usage: "the configuration file to use",
 		},
 		cli.IntFlag{
 			Name:  "port",
@@ -82,13 +79,10 @@ var metricsExportCommand = cli.Command{
 		},
 	},
 	Action: func(context *cli.Context) error {
-		if !context.IsSet("resort") {
-			return fmt.Errorf("Please specify the resort to used via the --resort option")
+		if !context.IsSet("config") {
+			return fmt.Errorf("Please specify the configuration file to used via the --config option")
 		}
-		if !context.IsSet("region") {
-			return fmt.Errorf("Please specify the region to used via the --region option")
-		}
-		exportSkiResortMetrics(context.String("resort"), context.String("region"), context.Int("port"), context.String("metricsPath"))
+		exportSkiResortMetrics(context.String("config"), context.Int("port"), context.String("metricsPath"))
 		return nil
 	},
 }
@@ -96,8 +90,13 @@ var metricsExportCommand = cli.Command{
 func displaySkiResortMetrics(name string, region string) {
 }
 
-func exportSkiResortMetrics(name string, region string, port int, metricsPath string) {
-	exporter, err := metrics.NewExporter(name, region)
+func exportSkiResortMetrics(configFile string, port int, metricsPath string) {
+	conf, err := config.New(configFile)
+	if err != nil {
+		fmt.Println(redOut(err))
+		return
+	}
+	exporter, err := metrics.NewExporter(conf)
 	if err != nil {
 		fmt.Println(redOut(err))
 		os.Exit(1)

@@ -1,0 +1,14 @@
+# Chione configuration
+
+# Ski Resorts
+[[skiresorts]]
+name = "peyragudes"
+region = "pyrenees"
+
+[[skiresorts]]
+name = "cauterets"
+region = "pyrenees"
+
+[[skiresorts]]
+name = "val-thorens"
+region = "alpes-du-nord"

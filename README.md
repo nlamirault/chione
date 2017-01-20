@@ -15,9 +15,9 @@ This tool is a simple CLI to display informations about skiing resorts.
 
 You can download the binaries :
 
-* Architecture i386 [ [linux](https://bintray.com/artifact/download/nlamirault/oss/chione-0.1.0_linux_386) / [darwin](https://bintray.com/artifact/download/nlamirault/oss/chione-0.1.0_darwin_386) / [freebsd](https://bintray.com/artifact/download/nlamirault/oss/chione-0.1.0_freebsd_386) / [netbsd](https://bintray.com/artifact/download/nlamirault/oss/chione-0.1.0_netbsd_386) / [openbsd](https://bintray.com/artifact/download/nlamirault/oss/chione-0.1.0_openbsd_386) / [windows](https://bintray.com/artifact/download/nlamirault/oss/chione-0.1.0_windows_386.exe) ]
-* Architecture amd64 [ [linux](https://bintray.com/artifact/download/nlamirault/oss/chione-0.1.0_linux_amd64) / [darwin](https://bintray.com/artifact/download/nlamirault/oss/chione-0.1.0_darwin_amd64) / [freebsd](https://bintray.com/artifact/download/nlamirault/oss/chione-0.1.0_freebsd_amd64) / [netbsd](https://bintray.com/artifact/download/nlamirault/oss/chione-0.1.0_netbsd_amd64) / [openbsd](https://bintray.com/artifact/download/nlamirault/oss/chione-0.1.0_openbsd_amd64) / [windows](https://bintray.com/artifact/download/nlamirault/oss/chione-0.1.0_windows_amd64.exe) ]
-* Architecture arm [ [linux](https://bintray.com/artifact/download/nlamirault/oss/chione-0.1.0_linux_arm) / [freebsd](https://bintray.com/artifact/download/nlamirault/oss/chione-0.1.0_freebsd_arm) / [netbsd](https://bintray.com/artifact/download/nlamirault/oss/chione-0.1.0_netbsd_arm) ]
+* Architecture i386 [ [linux](https://bintray.com/artifact/download/nlamirault/oss/chione-0.2.0_linux_386) / [darwin](https://bintray.com/artifact/download/nlamirault/oss/chione-0.2.0_darwin_386) / [freebsd](https://bintray.com/artifact/download/nlamirault/oss/chione-0.2.0_freebsd_386) / [netbsd](https://bintray.com/artifact/download/nlamirault/oss/chione-0.2.0_netbsd_386) / [openbsd](https://bintray.com/artifact/download/nlamirault/oss/chione-0.2.0_openbsd_386) / [windows](https://bintray.com/artifact/download/nlamirault/oss/chione-0.2.0_windows_386.exe) ]
+* Architecture amd64 [ [linux](https://bintray.com/artifact/download/nlamirault/oss/chione-0.2.0_linux_amd64) / [darwin](https://bintray.com/artifact/download/nlamirault/oss/chione-0.2.0_darwin_amd64) / [freebsd](https://bintray.com/artifact/download/nlamirault/oss/chione-0.2.0_freebsd_amd64) / [netbsd](https://bintray.com/artifact/download/nlamirault/oss/chione-0.2.0_netbsd_amd64) / [openbsd](https://bintray.com/artifact/download/nlamirault/oss/chione-0.2.0_openbsd_amd64) / [windows](https://bintray.com/artifact/download/nlamirault/oss/chione-0.2.0_windows_amd64.exe) ]
+* Architecture arm [ [linux](https://bintray.com/artifact/download/nlamirault/oss/chione-0.2.0_linux_arm) / [freebsd](https://bintray.com/artifact/download/nlamirault/oss/chione-0.2.0_freebsd_arm) / [netbsd](https://bintray.com/artifact/download/nlamirault/oss/chione-0.2.0_netbsd_arm) ]
 
 
 ## Usage
@@ -57,7 +57,7 @@ You can download the binaries :
         [...]
 
 
-* Display informations about a leage:
+* Display informations about a ski resort:
 
         $ /chione --debug resort describe --resort val-thorens --region alpes-du-nord
         +----------------------------+--------------------------------+

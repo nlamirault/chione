@@ -35,6 +35,7 @@ func main() {
 		cmd.VersionCommand,
 		cmd.ResortsCommand,
 		cmd.ResortCommand,
+		cmd.MetricsCommand,
 	}
 
 	app.Flags = []cli.Flag{

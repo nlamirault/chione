@@ -15,7 +15,7 @@
 package main
 
 import (
-	// "fmt"
+	//"fmt"
 	"os"
 
 	"github.com/Sirupsen/logrus"
@@ -30,7 +30,7 @@ func main() {
 	app.Name = "chione"
 	app.Usage = "CLI for skiing resorts informations"
 	app.Version = version.Version
-
+	// app.Copyright = "(c) 2017 Nicolas Lamirault"
 	app.Commands = []cli.Command{
 		cmd.VersionCommand,
 		cmd.ResortsCommand,
@@ -46,6 +46,11 @@ func main() {
 		},
 	}
 	app.Action = func(context *cli.Context) error {
+		cli.ShowAppHelp(context)
+		return nil
+	}
+	app.Before = func(context *cli.Context) error {
+		logrus.SetOutput(os.Stdout)
 		if context.Bool("debug") {
 			logrus.SetLevel(logrus.DebugLevel)
 		} else {
@@ -53,6 +58,7 @@ func main() {
 		}
 		return nil
 	}
+
 	if err := app.Run(os.Args); err != nil {
 		logrus.Fatal(err)
 	}

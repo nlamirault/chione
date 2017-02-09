@@ -50,7 +50,7 @@ var resortsListCommand = cli.Command{
 			return nil
 		}
 		for _, resort := range resorts {
-			fmt.Printf("- %s [%s]\n", skiinfo.MakeResortName(resort.Name), skiinfo.MakeResortName(resort.Region))
+			fmt.Printf("- %s %s [%s]\n", resort.Name, skiinfo.MakeResortName(resort.Name), skiinfo.MakeResortName(resort.Region))
 		}
 		return nil
 	},

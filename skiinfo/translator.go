@@ -29,6 +29,7 @@ var (
 		"AILLONS MARGERIAZ":    "les-aillons-margeriaz",
 		"ARVIEUX EN QUEYRAS":   "arvieux",
 		"BEILLE":               "plateau-de-beille",
+		"Grand Tourmalet (La Mongie / Barèges)": "la-mongie-bareges",
 	}
 )
 

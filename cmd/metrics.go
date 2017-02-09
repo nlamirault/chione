@@ -30,35 +30,10 @@ import (
 var MetricsCommand = cli.Command{
 	Name: "metrics",
 	Subcommands: []cli.Command{
-		metricsDryRunCommand,
 		metricsExportCommand,
 	},
 }
 
-var metricsDryRunCommand = cli.Command{
-	Name:  "dryRun",
-	Usage: "Test metrics for a ski resort",
-	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "resort",
-			Usage: "the resort name",
-		},
-		cli.StringFlag{
-			Name:  "region",
-			Usage: "the region name",
-		},
-	},
-	Action: func(context *cli.Context) error {
-		if !context.IsSet("resort") {
-			return fmt.Errorf("Please specify the resort to used via the --resort option")
-		}
-		if !context.IsSet("region") {
-			return fmt.Errorf("Please specify the region to used via the --region option")
-		}
-		displaySkiResortMetrics(context.String("resort"), context.String("region"))
-		return nil
-	},
-}
 var metricsExportCommand = cli.Command{
 	Name:  "export",
 	Usage: "Export metrics for a ski resort",
@@ -85,9 +60,6 @@ var metricsExportCommand = cli.Command{
 		exportSkiResortMetrics(context.String("config"), context.Int("port"), context.String("metricsPath"))
 		return nil
 	},
-}
-
-func displaySkiResortMetrics(name string, region string) {
 }
 
 func exportSkiResortMetrics(configFile string, port int, metricsPath string) {

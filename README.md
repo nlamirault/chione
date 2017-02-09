@@ -48,7 +48,7 @@ You can download the binaries :
 
 * Show skiing resorts for a country :
 
-        $ ./chione --debug resorts list --country france
+        $ chione --debug resorts list --country france
         Resorts:
         - le-markstein [vosges]
         - bussang---larcenaire [vosges]
@@ -59,7 +59,7 @@ You can download the binaries :
 
 * Display informations about a ski resort:
 
-        $ /chione --debug resort describe --resort val-thorens --region alpes-du-nord
+        $ chione --debug resort describe --resort val-thorens --region alpes-du-nord
         +----------------------------+--------------------------------+
         | Status                     | Ouverte                        |
         +----------------------------+--------------------------------+
@@ -88,6 +88,73 @@ You can download the binaries :
         |                            | - Noires: 5/9                  |
         +----------------------------+--------------------------------+
 
+* Display metrics about a ski resort :
+
+        $ chione --debug metrics export --config chione.toml
+
+With configuration file :
+
+```toml
+# Chione configuration
+
+# Ski Resorts
+[[skiresorts]]
+name = "peyragudes"
+region = "pyrenees"
+
+[[skiresorts]]
+name = "cauterets"
+region = "pyrenees"
+
+[[skiresorts]]
+name = "la-mongie-bareges"
+region = "pyrenees"
+
+[[skiresorts]]
+name = "val-thorens"
+region = "alpes-du-nord"
+```
+
+Metrics are :
+
+```
+# HELP chione_advanced Number of open advanced slopes.
+# TYPE chione_advanced gauge
+chione_advanced{name="cauterets"} 6
+chione_advanced{name="la-mongie-bareges"} 15
+chione_advanced{name="peyragudes"} 15
+chione_advanced{name="val-thorens"} 27
+# HELP chione_beginner Number of open beginner slopes.
+# TYPE chione_beginner gauge
+chione_beginner{name="cauterets"} 4
+chione_beginner{name="la-mongie-bareges"} 16
+chione_beginner{name="peyragudes"} 5
+chione_beginner{name="val-thorens"} 11
+# HELP chione_expert Number of open expert slopes.
+# TYPE chione_expert gauge
+chione_expert{name="cauterets"} 2
+chione_expert{name="la-mongie-bareges"} 4
+chione_expert{name="peyragudes"} 4
+chione_expert{name="val-thorens"} 7
+# HELP chione_intermediate Number of open intermediate slopes.
+# TYPE chione_intermediate gauge
+chione_intermediate{name="cauterets"} 9
+chione_intermediate{name="la-mongie-bareges"} 21
+chione_intermediate{name="peyragudes"} 22
+chione_intermediate{name="val-thorens"} 29
+# HELP chione_lower Snow depths at the lower of the ski resort
+# TYPE chione_lower gauge
+chione_lower{name="cauterets"} 240
+chione_lower{name="la-mongie-bareges"} 120
+chione_lower{name="peyragudes"} 140
+chione_lower{name="val-thorens"} 139
+# HELP chione_upper Snow depths at the upper of the ski resort.
+# TYPE chione_upper gauge
+chione_upper{name="cauterets"} 290
+chione_upper{name="la-mongie-bareges"} 200
+chione_upper{name="peyragudes"} 190
+chione_upper{name="val-thorens"} 227
+```
 
 ## Development
 

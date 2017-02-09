@@ -10,5 +10,9 @@ name = "cauterets"
 region = "pyrenees"
 
 [[skiresorts]]
+name = "la-mongie-bareges"
+region = "pyrenees"
+
+[[skiresorts]]
 name = "val-thorens"
 region = "alpes-du-nord"

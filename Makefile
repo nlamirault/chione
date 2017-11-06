@@ -67,8 +67,7 @@ clean: ## Cleanup
 init: ## Install requirements
 	@echo -e "$(OK_COLOR)[$(APP)] Install requirements$(NO_COLOR)"
 	@go get -u github.com/golang/glog
-	@go get -u github.com/kardianos/govendor
-	@go get -u github.com/Masterminds/rmvcsdir
+	@go get -u github.com/golang/dep/cmd/dep
 	@go get -u github.com/golang/lint/golint
 	@go get -u github.com/kisielk/errcheck
 	@go get -u github.com/mitchellh/gox
@@ -76,7 +75,7 @@ init: ## Install requirements
 .PHONY: deps
 deps: ## Install dependencies
 	@echo -e "$(OK_COLOR)[$(APP)] Update dependencies$(NO_COLOR)"
-	@govendor update
+	@dep ensure -update
 
 .PHONY: build
 build: ## Make binary
@@ -86,7 +85,7 @@ build: ## Make binary
 .PHONY: test
 test: ## Launch unit tests
 	@echo -e "$(OK_COLOR)[$(APP)] Launch unit tests $(NO_COLOR)"
-	@govendor test +local
+	@go test -v $$(go list ./... | grep -v /vendor/)
 
 .PHONY: lint
 lint: ## Launch golint
@@ -99,11 +98,11 @@ vet: ## Launch go vet
 .PHONY: errcheck
 errcheck: ## Launch go errcheck
 	@echo -e "$(OK_COLOR)[$(APP)] Go Errcheck $(NO_COLOR)"
-	@$(foreach pkg,$(PKGS),errcheck $(pkg) $(glide novendor) || exit;)
+	@$(foreach pkg,$(PKGS),errcheck $(pkg) || exit;)
 
 .PHONY: coverage
 coverage: ## Launch code coverage
-	@$(foreach pkg,$(PKGS),$(GO) test -cover $(pkg) $(glide novendor) || exit;)
+	@go test -cover -v $$(go list ./... | grep -v /vendor/)
 
 gox: ## Make all binaries
 	@echo -e "$(OK_COLOR)[$(APP)] Create binaries $(NO_COLOR)"
